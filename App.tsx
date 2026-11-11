@@ -131,11 +131,11 @@ const SCENE_GROUPS:SceneGroup[]=[
 {name:'Entorno urbano',subtitle:'Calles, peatones y prioridades',ids:['urban','one-way','crosswalk','school','gas-station']}
 ];
 function ScenePreview({id}:{id:string}){
- const asphalt='#50565c',grass='#84a976',border='#d8dde0',white='#f5f6f4';
- const road=(d:string,w:number)=> <g><path d={d} fill="none" stroke={border} strokeWidth={w+2} strokeLinejoin="round"/><path d={d} fill="none" stroke={asphalt} strokeWidth={w} strokeLinejoin="round"/></g>;
- const mark=(d:string,solid=false)=> <path d={d} fill="none" stroke={white} strokeWidth="1.15" strokeDasharray={solid?undefined:"8 7"}/>;
+ const asphalt='#ffffff',grass='#e3e3e3',border='#44484c',white='#a6a9ac';
+ const road=(d:string,w:number)=> <g><path d={d} fill="none" stroke={border} strokeWidth={w+1.5} strokeLinejoin="round"/><path d={d} fill="none" stroke={asphalt} strokeWidth={w} strokeLinejoin="round"/></g>;
+ const mark=(d:string,solid=false)=> <path d={d} fill="none" stroke={white} strokeWidth="0.8" strokeDasharray={solid?undefined:"3 4"}/>;
  const zebra=(x:number,y:number,axis:'x'|'y'='x')=><g>{Array.from({length:7},(_,i)=><rect key={i} x={axis==='x'?x-13+i*4:x-7} y={axis==='x'?y-7:y-13+i*4} width={axis==='x'?2.5:14} height={axis==='x'?14:2.5} fill={white}/>)}</g>;
- const laneArrow=(x:number,y:number,rot=0)=><path transform={`translate(${x} ${y}) rotate(${rot})`} d="M 0 12 V -10 M -5 -4 L 0 -11 L 5 -4" stroke={white} strokeWidth="1.5" fill="none" strokeLinecap="round"/>;
+ const laneArrow=(x:number,y:number,rot=0)=><path transform={`translate(${x} ${y}) rotate(${rot})`} d="M 0 12 V -10 M -5 -4 L 0 -11 L 5 -4" stroke={white} strokeWidth="0.9" fill="none" strokeLinecap="round"/>;
  const horiz=(y=50,w=34)=>road(`M -25 ${y} H 205`,w);
  const vert=(x=90,w=34)=>road(`M ${x} -25 V 125`,w);
  let body:React.ReactNode;
@@ -150,7 +150,7 @@ function ScenePreview({id}:{id:string}){
    {ped&&<>{zebra(90,20,'x')}{zebra(90,80,'x')}{zebra(54,50,'y')}{zebra(126,50,'y')}</>}
   </>;
  }else if(['t-junction','rural-junction','Y-junction'].includes(id)){
-  body=id==='Y-junction'?<>{road('M 90 125 V 58 L 15 -25',30)}{road('M 90 58 L 165 -25',30)}{mark('M 90 125 V 77')}{mark('M 60 26 L 20 -18')}{mark('M 120 26 L 160 -18')}</>:<>{horiz(32,32)}{road('M 90 32 V 125',32)}<rect x="74" y="16" width="32" height="33" fill={asphalt}/>{mark('M 0 32 H 68')}{mark('M 112 32 H 180')}{mark('M 90 54 V 100')}<path d="M 74 55 H 106" stroke={white} strokeWidth="2"/></>;
+  body=id==='Y-junction'?<>{road('M 90 125 V 58 L 15 -25',30)}{road('M 90 58 L 165 -25',30)}{mark('M 90 125 V 77')}{mark('M 60 26 L 20 -18')}{mark('M 120 26 L 160 -18')}</>:<>{horiz(32,32)}{road('M 90 32 V 125',32)}<rect x="74" y="16" width="32" height="33" fill={asphalt}/>{mark('M 0 32 H 68')}{mark('M 112 32 H 180')}{mark('M 90 54 V 100')}<path d="M 74 55 H 106" stroke={white} strokeWidth="0.8"/></>;
  }else if(['merge','on-ramp','off-ramp','lane-drop'].includes(id)){
   const exit=id==='off-ramp',drop=id==='lane-drop';
   body=<>{horiz(29,27)}{horiz(75,27)}{road(exit?'M 73 75 C 113 75 134 104 182 135':drop?'M -25 123 C 35 115 74 75 126 75 H 205':'M -25 132 C 37 112 65 75 125 75 H 205',25)}{mark('M 0 29 H 180')}{mark('M 0 75 H 64')}{mark('M 134 75 H 180')}{mark(exit?'M 106 85 L 157 121':'M 10 117 L 75 84')}</>;
@@ -158,16 +158,16 @@ function ScenePreview({id}:{id:string}){
   body=<>{horiz(29,31)}{horiz(77,31)}<rect x="0" y="48" width="180" height="10" fill={grass}/>{mark('M 0 29 H 180')}{mark('M 0 77 H 180')}{laneArrow(130,29,90)}{laneArrow(50,77,-90)}</>;
  }else if(['parking','reverse','parking-angled','parking-large'].includes(id)){
   const angled=id==='parking-angled',parallel=id==='parking';
-  body=<><rect x="0" y="0" width="180" height="100" fill={asphalt}/><rect x="0" y="36" width="180" height="40" fill={asphalt}/>{Array.from({length:8},(_,i)=><g key={i}><path d={angled?`M ${i*26} 0 l 15 36`:`M ${i*26} 0 V 36`} stroke={white} strokeWidth="1.3"/><path d={angled?`M ${i*26} 76 l 15 24`:`M ${i*26} 76 V 100`} stroke={white} strokeWidth="1.3"/></g>)}{parallel&&<>{mark('M 0 55 H 180')}{laneArrow(90,55,90)}</>}</>;
+  body=<><rect x="0" y="0" width="180" height="100" fill={grass}/><rect x="0" y="9" width="180" height="28" fill={asphalt} stroke={border} strokeWidth="0.8"/><rect x="0" y="76" width="180" height="24" fill={asphalt} stroke={border} strokeWidth="0.8"/><rect x="0" y="37" width="180" height="39" fill={asphalt}/>{Array.from({length:8},(_,i)=><g key={i}><path d={angled?`M ${i*26} 0 l 15 36`:`M ${i*26} 0 V 36`} stroke={white} strokeWidth="1.3"/><path d={angled?`M ${i*26} 76 l 15 24`:`M ${i*26} 76 V 100`} stroke={white} strokeWidth="1.3"/></g>)}{parallel&&<>{mark('M 0 55 H 180')}{laneArrow(90,55,90)}</>}</>;
  }else if(['lane-change','one-way'].includes(id)){
   body=<>{horiz(50,76)}{mark('M 0 50 H 180')}{laneArrow(48,32,90)}{laneArrow(125,68,90)}</>;
  }else if(['rural','curve','s-curve','chicane','narrow'].includes(id)){
   const d=id==='rural'?'M -25 50 H 205':id==='narrow'?'M -25 50 H 55 Q 80 50 105 41 H 205':id==='chicane'?'M -25 50 H 38 Q 58 50 74 37 H 116 Q 133 37 152 50 H 205':'M -25 50 C 26 5 65 95 108 50 S 163 10 205 50';
   body=<>{road(d,id==='narrow'?30:39)}{mark(d,id==='rural')}</>;
  }else if(['crosswalk','school'].includes(id)){
-  body=<>{horiz(50,44)}{mark('M 0 50 H 65')}{mark('M 115 50 H 180')}{zebra(90,50,'x')}{id==='school'&&<rect x="130" y="2" width="42" height="22" rx="2" fill="#e8dfc6" stroke="#d3cab1"/>}</>;
+  body=<>{horiz(50,44)}{mark('M 0 50 H 65')}{mark('M 115 50 H 180')}{zebra(90,50,'x')}{id==='school'&&<rect x="130" y="2" width="42" height="22" rx="2" fill="#f5f5f5" stroke="#b6b6b6"/>}</>;
  }else if(id==='railway'){
-  body=<>{horiz(50,40)}<rect x="78" y="0" width="24" height="100" fill="#c6c8c5"/>{Array.from({length:9},(_,i)=><path key={i} d={`M 78 ${i*13} H 102`} stroke="#666b70" strokeWidth="3"/>)}<path d="M 84 0 V 100 M 96 0 V 100" stroke="#f4f4f4" strokeWidth="2" fill="none"/></>;
+  body=<>{horiz(50,40)}<rect x="78" y="0" width="24" height="100" fill="#eeeeee"/>{Array.from({length:9},(_,i)=><path key={i} d={`M 78 ${i*13} H 102`} stroke="#999999" strokeWidth="3"/>)}<path d="M 84 0 V 100 M 96 0 V 100" stroke="#f4f4f4" strokeWidth="2" fill="none"/></>;
  }else if(id==='gas-station'){
   body=<>{horiz(73,33)}<rect x="36" y="5" width="105" height="37" rx="3" fill="#e8dfc6" stroke="#d3cab1"/>{road('M 52 42 V 73',19)}{road('M 122 42 V 73',19)}{mark('M 0 73 H 35')}{mark('M 140 73 H 180')}</>;
  }else if(id==='cul-de-sac'){
