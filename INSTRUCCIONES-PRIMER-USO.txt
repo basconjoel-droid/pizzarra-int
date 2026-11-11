@@ -1,0 +1,17 @@
+PIZARRA VIAL B — PRIMER USO
+
+Este ZIP contiene el proyecto completo desde cero.
+
+Si vas a crear un proyecto nuevo en una plataforma que importe proyectos ZIP, importa el ZIP COMPLETO. No abras el ZIP y subas los archivos uno por uno.
+
+Si vas a usar un editor con terminal:
+1. Descomprime el ZIP.
+2. Abre la carpeta pizarra-vial-b-nuevo.
+3. Ejecuta: npm install
+4. Ejecuta: npm run dev
+
+Para publicar la aplicación: npm run build
+
+Los trabajos guardados se almacenan en el navegador del dispositivo. Exporta una copia JSON desde «Mis proyectos» si quieres conservarlos aparte.
+
+NOTA: Esta es una primera versión funcional, no la versión final con todas las funciones avanzadas. Lee README.md para conocer las limitaciones de los mapas y panorámicas.
