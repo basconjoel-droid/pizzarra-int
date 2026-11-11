@@ -69,3 +69,16 @@
 .road-editor-footer{border-top:1px solid #e1e5eb;font-size:13px;color:#64748b}
 .road-editor-footer button{background:#1f5b9c;color:#fff}
 @media(max-width:600px){.road-editor-backdrop{padding:0}.road-editor-panel{height:100dvh;border-radius:0}.road-editor-controls{gap:6px;padding:8px}.road-editor-header,.road-editor-footer{padding:10px}.road-editor-controls button{padding:7px}}
+
+/* Lienzo inmersivo para móvil: conserva la barra de capas y ofrece dibujo rápido */
+.fullscreen-toggle{border:1px solid #b9cce0;border-radius:8px;background:#e8f1fa;color:#174d7d;font-size:12px;font-weight:700;padding:8px 10px;white-space:nowrap;cursor:pointer}
+.map-fullscreen{position:fixed;inset:0;height:100dvh;min-height:0;z-index:2500;background:#fff}
+.map-fullscreen .top,.map-fullscreen .tools,.map-fullscreen .bottom-note,.map-fullscreen .map-status{display:none!important}
+.map-fullscreen .work-area{height:100%;min-height:0}
+.map-fullscreen .map-panel{height:100%;padding:0;gap:0}
+.map-fullscreen .map-toolbar{height:auto;min-height:48px;padding:6px 8px;gap:6px;flex-wrap:wrap;background:#fff;z-index:600}
+.map-fullscreen .map-host{min-height:0;flex:1;border:0;border-radius:0}
+.fullscreen-draw-tools{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:900;display:flex;gap:5px;align-items:center;max-width:calc(100% - 16px);overflow-x:auto;padding:7px;background:#ffffffed;border:1px solid #cbd5e1;border-radius:13px;box-shadow:0 4px 18px #0003;scrollbar-width:none}
+.fullscreen-draw-tools button{border:1px solid #d5dce5;background:#fff;border-radius:7px;padding:9px 11px;font-size:12px;font-weight:700;white-space:nowrap;color:#253b52}
+.fullscreen-draw-tools button.chosen{background:#dbeafe;border-color:#93c5fd;color:#155b98}
+@media(max-width:700px){.fullscreen-toggle{padding:7px;font-size:11px}.map-fullscreen .map-toolbar{max-height:116px;overflow-y:auto;align-content:center}.map-fullscreen .layers button{padding:0 7px}.map-fullscreen .map-actions button{min-width:30px;width:30px}.fullscreen-draw-tools{width:max-content}}
