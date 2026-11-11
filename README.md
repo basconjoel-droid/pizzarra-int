@@ -28,6 +28,10 @@ npm run build
 npm run preview
 ```
 
+## Validación automática
+
+Cada cambio enviado a `main` se comprueba mediante GitHub Actions: instala las dependencias, valida TypeScript y genera la compilación de producción. Así se detectan errores antes de publicar una nueva versión.
+
 ## Importante sobre mapas y panorámicas
 
 - OpenStreetMap muestra cartografía de calles, no imágenes satélite.
@@ -43,3 +47,4 @@ Los proyectos se guardan en el almacenamiento local del navegador del dispositiv
 ## Alcance
 
 Es una base funcional inicial para ampliar. Los escenarios visuales, preguntas, editor de pizarra y herramientas de mapa se pueden desarrollar en fases posteriores. No sustituye la normativa ni los criterios oficiales de evaluación de la DGT.
+
