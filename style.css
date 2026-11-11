@@ -21,3 +21,24 @@
 .template-footnote{margin:15px 0 0;padding-top:12px;border-top:1px solid #edf0f4;color:#8793a2;font-size:10px;line-height:1.5}
 @media(max-width:680px){.template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.templates-modal{padding:14px;max-height:90vh}.template-preview{height:82px}}
 @media(max-width:390px){.template-grid{grid-template-columns:1fr}}
+
+/* Biblioteca de escenarios: tarjetas como la referencia proporcionada */
+.templates-modal{width:min(1320px,96vw);max-height:94vh;overflow:auto;background:#f2f6fa}
+.scene-group-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:20px 0}
+.scene-group-card{display:flex;flex-direction:column;text-align:left;padding:0;overflow:hidden;border:1px solid #d5dfe8;border-radius:24px;background:#fff;cursor:pointer;transition:box-shadow .15s,transform .15s}
+.scene-group-card:hover,.scene-group-active{box-shadow:0 7px 22px #162f4920;transform:translateY(-2px)}
+.scene-group-picture{width:100%;aspect-ratio:1.78;overflow:hidden;background:#80a76f}
+.scene-group-copy{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 19px 20px}
+.scene-group-copy b{display:block;font-size:19px;color:#101e2c;line-height:1.35}
+.scene-group-copy small{display:block;font-size:15px;color:#64758a;margin-top:4px}
+.scene-count{display:grid;place-items:center;flex-shrink:0;min-width:32px;height:32px;border-radius:50%;background:#e7edf4;color:#172638;font-weight:600}
+.scene-expanded{border-top:1px solid #d6e0e9;padding-top:17px;margin-top:16px}
+.scene-expanded-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;font-size:18px}
+.scene-expanded-head button{background:transparent;border:0;cursor:pointer}
+.scene-subgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.scene-option{overflow:hidden;text-align:left;border:1px solid #d5dfe8;border-radius:14px;background:#fff;padding:0 0 13px;cursor:pointer}
+.scene-option-picture{height:140px;overflow:hidden;background:#80a76f}
+.scene-option b,.scene-option small{display:block;margin:10px 13px 0}
+.scene-option small{font-size:12px;color:#66798c}
+@media(max-width:900px){.scene-group-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.scene-subgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.scene-group-grid{grid-template-columns:1fr}.scene-subgrid{grid-template-columns:1fr}.scene-group-copy b{font-size:17px}.scene-group-copy small{font-size:13px}}
