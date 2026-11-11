@@ -52,3 +52,6 @@
 .vector-map-visible{opacity:1;visibility:visible}
 .vector-map .maplibregl-control-container{display:none}
 .layers{flex-wrap:wrap}
+
+/* Croquis técnicos: mismo fondo en la biblioteca y en el lienzo */
+.active-scene-board,.scene-option-picture{background:#e5e5e5}
