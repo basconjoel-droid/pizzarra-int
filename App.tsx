@@ -1,6 +1,6 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import L from 'leaflet';
-import {Map as MapIcon,Satellite,Search,Save,FolderOpen,Download,Undo2,Trash2,MousePointer2,Pencil,ArrowUpRight,Square,Car,Bus,Bike,Footprints,TrafficCone,Signpost,Type,Plus,Minus,LocateFixed,Layers,Menu,X,ChevronDown,Copy,MapPinned,LayoutTemplate} from 'lucide-react';
+import {Map as MapIcon,Satellite,Search,Save,FolderOpen,Download,Undo2,Trash2,MousePointer2,Pencil,ArrowUpRight,Square,Car,Bus,Bike,Footprints,TrafficCone,Signpost,Type,Plus,Minus,LocateFixed,Layers,Menu,X,MapPinned,LayoutTemplate} from 'lucide-react';
 
 type Point={lat:number;lng:number};
 type Feature={id:string;kind:string;points:Point[];color:string;text?:string;rotation?:number};
@@ -9,115 +9,20 @@ type RoadPoint={x:number;y:number};
 type CustomRoad={id:string;points:RoadPoint[];width:number;lanes:number;dashed:boolean};
 const KEY='pizarra-vial-projects-v2';
 const COLORS=['#e53935','#1769e0','#13a36f','#f2a900'];
-type Template={id:string;name:string;category:string;description:string;roads:number[][][];markings?:number[][][];labels?:{x:number;y:number;text:string}[]};
+type Template={id:string;name:string;category:string;description:string};
 const TEMPLATES:Template[]=[
-{id:'roundabout',name:'Glorieta',category:'Intersecciones',description:'Glorieta de cuatro ramales con isleta central y pasos de entrada.',roads:[[[-260,0],[-96,0]],[[96,0],[260,0]],[[0,-230],[0,-96]],[[0,96],[0,230]],[[96,0],[95,13],[93,25],[89,37],[83,48],[76,58],[68,68],[58,76],[48,83],[37,89],[25,93],[13,95],[0,96],[-13,95],[-25,93],[-37,89],[-48,83],[-58,76],[-68,68],[-76,58],[-83,48],[-89,37],[-93,25],[-95,13],[-96,0],[-95,-13],[-93,-25],[-89,-37],[-83,-48],[-76,-58],[-68,-68],[-58,-76],[-48,-83],[-37,-89],[-25,-93],[-13,-95],[0,-96],[13,-95],[25,-93],[37,-89],[48,-83],[58,-76],[68,-68],[76,-58],[83,-48],[89,-37],[93,-25],[95,-13],[96,0]]],markings:[[[-260,-36],[-110,-36]],[[-110,36],[-260,36]],[[110,-36],[260,-36]],[[260,36],[110,36]],[[ -36,-230],[-36,-105]],[[36,-105],[36,-230]],[[-36,105],[-36,230]],[[36,230],[36,105]]],labels:[{x:0,y:0,text:'GLORIETA'}]},
-{id:'cross',name:'Cruce en cruz',category:'Intersecciones',description:'Intersección de cuatro brazos y prioridades.',roads:[[[-250,-40],[250,-40]],[[-250,40],[250,40]],[[-40,-220],[-40,220]],[[40,-220],[40,220]]],markings:[[[-250,-38],[-45,-38]],[[45,-38],[250,-38]],[[-38,-220],[-38,-48]],[[38,48],[38,220]]]},
-{id:'t-junction',name:'Intersección en T',category:'Intersecciones',description:'Cruce en T para practicar prioridades y giros.',roads:[[[-230,-40],[230,-40]],[[-230,40],[230,40]],[[-40,0],[-40,220]],[[40,0],[40,220]]],markings:[[[-230,-36],[-42,-36]],[[42,-36],[230,-36]],[[36,42],[36,220]]]},
-{id:'Y-junction',name:'Intersección en Y',category:'Intersecciones',description:'Bifurcación y convergencia de trayectorias.',roads:[[[-220,145],[-32,-10]],[[-180,205],[8,50]],[[220,145],[32,-10]],[[180,205],[-8,50]],[[-40,-220],[-40,-4]],[[40,-220],[40,4]]],markings:[[[-180,145],[-10,-5]],[[180,145],[10,-5]],[[0,-220],[0,-50]]]},
-{id:'merge',name:'Incorporación',category:'Carreteras',description:'Carril de aceleración y entrada a vía principal.',roads:[[[-260,-65],[260,-65]],[[-260,65],[260,65]],[[-250,210],[0,65],[130,65]]],markings:[[[-260,0],[260,0]],[[-250,210],[-120,130],[-40,65]]]},
-{id:'highway',name:'Autovía: dos carriles',category:'Carreteras',description:'Calzadas separadas para cambios de carril y adelantamientos.',roads:[[[-270,-105],[270,-105]],[[-270,-35],[270,-35]],[[-270,35],[270,35]],[[-270,105],[270,105]]],markings:[[[-270,-70],[270,-70]],[[-270,0],[270,0]],[[-270,70],[270,70]]]},
-{id:'rural',name:'Carretera convencional',category:'Carreteras',description:'Doble sentido con un carril por sentido.',roads:[[[-270,-55],[-120,-55],[0,-75],[130,-45],[270,-55]],[[-270,55],[-120,55],[0,75],[130,45],[270,55]]],markings:[[[-270,0],[-120,0],[0,0],[130,0],[270,0]]]},
-{id:'curve',name:'Curvas y cambio de rasante',category:'Carreteras',description:'Tramo sinuoso para anticipación, velocidad y trazada.',roads:[[[-260,-70],[-170,-70],[-90,-130],[10,-130],[100,-65],[180,-65],[260,-130]],[[-260,70],[-170,70],[-90,10],[10,10],[100,75],[180,75],[260,10]]],markings:[[[-260,0],[-170,0],[-90,-60],[10,-60],[100,5],[180,5],[260,-60]]]},
-{id:'crosswalk',name:'Paso de peatones',category:'Urbano',description:'Paso señalizado y zona de aproximación.',roads:[[[-250,-70],[250,-70]],[[-250,70],[250,70]]],markings:Array.from({length:9},(_,i)=>[[i*18-72,-65],[i*18-72,65]])},
-{id:'school',name:'Entorno escolar',category:'Urbano',description:'Calle urbana con paso peatonal y zona de parada.',roads:[[[-260,-75],[260,-75]],[[-260,75],[260,75]]],markings:Array.from({length:8},(_,i)=>[[i*20-70,-68],[i*20-70,68]]),labels:[{x:185,y:-115,text:'ZONA ESCOLAR'}]},
-{id:'parking',name:'Aparcamiento en línea',category:'Maniobras',description:'Plazas en línea para practicar estacionamiento.',roads:[[[-250,-90],[250,-90]],[[-250,90],[250,90]]],markings:Array.from({length:7},(_,i)=>[[i*65-195,-90],[i*65-195,90]])},
-{id:'reverse',name:'Estacionamiento en batería',category:'Maniobras',description:'Plazas perpendiculares y pasillo de circulación.',roads:[[[-250,-100],[250,-100]],[[-250,100],[250,100]]],markings:Array.from({length:7},(_,i)=>[[i*65-195,-100],[i*65-195,0],[i*65-195,100]])},
-{id:'lane-change',name:'Cambio de carril',category:'Maniobras',description:'Dos carriles del mismo sentido con espacio para señalizar y desplazarse.',roads:[[[-260,-80],[260,-80]],[[-260,0],[260,0]],[[-260,80],[260,80]]],markings:[[[-260,-40],[260,-40]],[[-260,40],[260,40]]]},
-{id:'urban',name:'Calle de doble sentido',category:'Urbano',description:'Calle urbana con intersecciones laterales.',roads:[[[-260,-55],[260,-55]],[[-260,55],[260,55]],[[-100,-220],[-100,-55]],[[130,55],[130,220]]],markings:[[[-260,0],[260,0]],[[-100,-220],[-100,-90]],[[130,90],[130,220]]]},
-{id:'narrow',name:'Estrechamiento de calzada',category:'Carreteras',description:'Reducción de anchura y prioridad de paso.',roads:[[[-260,-100],[-80,-100],[0,-45],[80,-45],[260,-45]],[[-260,100],[-80,100],[0,45],[80,45],[260,45]]],markings:[[[-260,0],[-80,0],[0,0],[80,0],[260,0]]]}
-
-,{id:'offset-cross',name:'Cruce de vías desplazadas',category:'Intersecciones',description:'Dos cruces próximos con desplazamiento lateral y espacio de espera.',roads:[[[-260,-75],[260,-75]],[[-260,75],[260,75]],[[-105,-230],[-105,-75]],[[95,75],[95,230]]],markings:[[[-260,0],[-145,0]],[[145,0],[260,0]],[[-145,-230],[-145,-75]],[[135,75],[135,230]]]},
-{id:'skewed-cross',name:'Cruce oblicuo',category:'Intersecciones',description:'Intersección de cuatro ramales con ángulo oblicuo.',roads:[[[-260,-35],[260,-35]],[[-100,-230],[100,230]]],markings:[[[-260,-70],[260,-70]],[[-130,-230],[-55,-80]],[[55,80],[130,230]]]},
-{id:'five-arm',name:'Intersección de cinco brazos',category:'Intersecciones',description:'Cruce múltiple para analizar prioridades y trayectorias.',roads:[[[-250,0],[250,0]],[[0,-220],[0,0]],[[-170,-170],[0,0]],[[0,0],[170,170]]],markings:[[[-250,-36],[-55,-36]],[[55,-36],[250,-36]],[[-36,-220],[-36,-55]],[[36,55],[36,220]]]},
-{id:'three-arm-roundabout',name:'Glorieta de tres salidas',category:'Intersecciones',description:'Glorieta compacta con tres ramales y circulación anular.',roads:[[[-250,0],[-100,0]],[[100,0],[250,0]],[[-70,-190],[-35,-95]],[[35,95],[100,205]]],markings:[[[-250,-36],[-100,-36]],[[100,36],[250,36]]]},
-{id:'mini-roundabout',name:'Mini glorieta',category:'Intersecciones',description:'Intersección urbana con isleta central reducida.',roads:[[[-250,0],[-65,0]],[[65,0],[250,0]],[[0,-210],[0,-65]],[[0,65],[0,210]]],markings:[[[-250,-36],[-65,-36]],[[65,36],[250,36]],[[-36,-210],[-36,-65]],[[36,65],[36,210]]],labels:[{x:0,y:0,text:'ISLETA'}]},
-{id:'divided-road',name:'Avenida con mediana',category:'Carreteras',description:'Dos calzadas separadas por mediana ajardinada.',roads:[[[-260,-95],[260,-95]],[[-260,-25],[260,-25]],[[-260,25],[260,25]],[[-260,95],[260,95]]],markings:[[[-260,-60],[260,-60]],[[-260,60],[260,60]]],labels:[{x:0,y:0,text:'MEDIANA'}]},
-{id:'on-ramp',name:'Entrada a autovía',category:'Carreteras',description:'Carril de aceleración paralelo y convergencia progresiva.',roads:[[[-260,-105],[260,-105]],[[-260,-35],[260,-35]],[[-260,35],[260,35]],[[-260,105],[260,105]],[[-260,220],[-120,160],[20,105],[150,105]]],markings:[[[-260,0],[260,0]],[[-260,70],[-150,120],[-40,105]]]},
-{id:'off-ramp',name:'Salida de autovía',category:'Carreteras',description:'Carril de deceleración y salida divergente.',roads:[[[-260,-105],[260,-105]],[[-260,-35],[260,-35]],[[-260,35],[260,35]],[[-260,105],[260,105]],[[0,35],[130,90],[260,220]]],markings:[[[-260,0],[260,0]],[[85,55],[170,125],[260,190]]]},
-{id:'lane-drop',name:'Reducción de carriles',category:'Carreteras',description:'Dos carriles que pasan a uno con señalización de convergencia.',roads:[[[-260,-100],[260,-100]],[[-260,-25],[40,-25],[130,-65],[260,-65]],[[-260,50],[40,50],[130, -5],[260,-5]]],markings:[[[-260,-62],[20,-62]],[[20,-62],[100,-35],[180,-35],[260,-35]]]},
-{id:'s-curve',name:'Curva en S',category:'Carreteras',description:'Doble curva para trabajar trazada, visibilidad y velocidad.',roads:[[[-260,-90],[-160,-90],[-70,-30],[40,-30],[140,-95],[260,-95]],[[-260,90],[-160,90],[-70,150],[40,150],[140,85],[260,85]]],markings:[[[-260,0],[-160,0],[-70,60],[40,60],[140,-5],[260,-5]]]},
-{id:'chicane',name:'Estrechamiento en zigzag',category:'Urbano',description:'Calzada con desplazamientos alternos para moderar la velocidad.',roads:[[[-260,-90],[-80,-90],[0,-25],[80,-25],[260,-90]],[[-260,90],[-80,90],[0,25],[80,25],[260,90]]],markings:[[[-260,0],[-80,0],[0,0],[80,0],[260,0]]]},
-{id:'one-way',name:'Calle de sentido único',category:'Urbano',description:'Vía urbana de un sentido con estacionamiento lateral.',roads:[[[-260,-75],[260,-75]],[[-260,75],[260,75]]],markings:[[[-260,0],[260,0]],[[-190,-75],[-190,-125]],[[-80,-75],[-80,-125]],[[30,-75],[30,-125]],[[140,-75],[140,-125]]],labels:[{x:0,y:35,text:'SENTIDO ÚNICO'}]},
-{id:'railway',name:'Paso a nivel',category:'Carreteras',description:'Cruce de carretera y vía ferroviaria con zona de detención.',roads:[[[-260,-55],[260,-55]],[[-260,55],[260,55]],[[0,-230],[0,230]]],markings:[[[-260,-15],[260,-15]],[[-260,15],[260,15]],[[-45,-55],[-45,55]],[[45,-55],[45,55]]],labels:[{x:100,y:-105,text:'VÍA FÉRREA'}]},
-{id:'cul-de-sac',name:'Fondo de saco',category:'Urbano',description:'Calle sin salida con espacio de giro en el extremo.',roads:[[[-230,0],[100,0]],[[100,-100],[220,-100],[220,100],[100,100],[100,0]]],markings:[[[-230,-36],[100,-36]],[[100,36],[-230,36]]]},
-{id:'parking-angled',name:'Aparcamiento en batería oblicua',category:'Maniobras',description:'Plazas en ángulo y pasillo central de circulación.',roads:[[[-250,-105],[250,-105]],[[-250,105],[250,105]]],markings:Array.from({length:8},(_,i)=>[[i*55-210,-105],[i*55-175,-35],[i*55-175,35],[i*55-210,105]])},
-{id:'parking-large',name:'Aparcamiento de varias filas',category:'Maniobras',description:'Dos hileras de plazas enfrentadas y pasillo de maniobra.',roads:[[[-250,-120],[250,-120]],[[-250,-35],[250,-35]],[[-250,35],[250,35]],[[-250,120],[250,120]]],markings:Array.from({length:8},(_,i)=>[[i*60-210,-120],[i*60-210,-35],[i*60-210,35],[i*60-210,120]])},
-{id:'gas-station',name:'Acceso a gasolinera',category:'Urbano',description:'Entrada y salida de un recinto desde una vía urbana.',roads:[[[-260,-75],[260,-75]],[[-260,75],[260,75]],[[-70,-75],[-70,-200]],[[100,-75],[100,-200]]],markings:[[[-260,0],[260,0]],[[-70,-200],[100,-200]]],labels:[{x:15,y:-155,text:'SERVICIOS'}]},
-{id:'rural-junction',name:'Cruce en carretera rural',category:'Carreteras',description:'Cruce convencional con ramal secundario y arcenes.',roads:[[[-260,-45],[260,-45]],[[-260,45],[260,45]],[[-30,45],[-30,220]],[[30,45],[30,220]]],markings:[[[-260,0],[260,0]],[[-30,90],[30,90]]]},
-{id:'urban-crosswalk',name:'Cruce urbano con pasos',category:'Urbano',description:'Intersección urbana con pasos peatonales en sus cuatro accesos.',roads:[[[-250,-75],[250,-75]],[[-250,75],[250,75]],[[-75,-220],[-75,220]],[[75,-220],[75,220]]],markings:[...Array.from({length:7},(_,i)=>[[-75+i*10,-72],[-75+i*10,-18]]),...Array.from({length:7},(_,i)=>[[-75+i*10,18],[-75+i*10,72]]),...Array.from({length:7},(_,i)=>[[-72,-75+i*10],[-18,-75+i*10]])]},
-{id:'slip-road',name:'Vía de servicio',category:'Carreteras',description:'Calzada principal y vía lateral separada por franja divisoria.',roads:[[[-260,-110],[260,-110]],[[-260,-40],[260,-40]],[[-260,80],[260,80]],[[-260,150],[260,150]]],markings:[[[-260,-75],[260,-75]],[[-260,115],[260,115]]],labels:[{x:0,y:0,text:'SEPARACIÓN'}]}
+{id:'urban',name:'Calle de doble sentido',category:'Calles y carriles',description:'Calle urbana de doble sentido con intersección lateral.'},
+{id:'lane-change',name:'Cambio de carril',category:'Calles y carriles',description:'Vía con varios carriles para practicar desplazamientos.'},
+{id:'reverse',name:'Estacionamiento en batería',category:'Estacionamientos',description:'Plazas perpendiculares y pasillo de circulación.'},
+{id:'parking-angled',name:'Aparcamiento en batería oblicua',category:'Estacionamientos',description:'Plazas en ángulo y pasillo central.'},
+{id:'cross',name:'Cruce en cruz',category:'Cruces',description:'Intersección de cuatro brazos.'},
+{id:'urban-crosswalk',name:'Cruce urbano con pasos',category:'Cruces',description:'Intersección con pasos de peatones.'},
+{id:'roundabout',name:'Glorieta',category:'Glorietas',description:'Glorieta de cuatro accesos y ramal inferior prolongado.'},
+{id:'on-ramp',name:'Entrada en autovía',category:'Autovías',description:'Entrada con carril de aceleración.'}
 ];
 const LAYERS={calles:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'© OpenStreetMap contributors'},satelite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Tiles © Esri — Sources: Esri, Maxar, Earthstar Geographics'}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 function readProjects():Project[]{try{const d=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(d)?d:[]}catch{return[]}}
-
-type SketchGeometry={roads:number[][][];markings:number[][][];labels?:{x:number;y:number;text:string}[]};
-const sketchCircle=(cx:number,cy:number,r:number,n=72)=>Array.from({length:n+1},(_,i)=>[cx+Math.cos(i/n*Math.PI*2)*r,cy+Math.sin(i/n*Math.PI*2)*r]);
-function preciseSketch(id:string):SketchGeometry|null{
- const R:number[][][]=[];const M:number[][][]=[];const labels:{x:number;y:number;text:string}[]=[];
- const r=(p:number[][])=>R.push(p),m=(p:number[][])=>M.push(p);
- const h=(y:number,a=-270,b=270)=>r([[a,y],[b,y]]),v=(x:number,a=-230,b=230)=>r([[x,a],[x,b]]);
- const mh=(y:number,a=-270,b=270)=>m([[a,y],[b,y]]),mv=(x:number,a=-230,b=230)=>m([[x,a],[x,b]]);
- const circle=(rad:number)=>r(Array.from({length:97},(_,i)=>[Math.cos(i/96*Math.PI*2)*rad,Math.sin(i/96*Math.PI*2)*rad]));
- switch(id){
- case'roundabout':case'mini-roundabout':case'three-arm-roundabout':{
- const mini=id==='mini-roundabout',three=id==='three-arm-roundabout',inner=mini?25:three?45:58,outer=mini?78:three?100:112,w=mini?23:34;
- circle(inner);circle(outer);
- if(three){
- r([[-250,100],[-outer*.72,outer*.72]]);r([[-250,150],[-outer*.38,outer*.92]]);
- r([[outer*.72,outer*.72],[250,100]]);r([[outer*.38,outer*.92],[250,150]]);
- r([[-w,-230],[-w,-outer]]);r([[w,-230],[w,-outer]]);
- mh(125,-250,-outer*.55);mh(125,outer*.55,250);mv(0,-230,-outer-8);
- }else{
- r([[-270,-w],[-outer,-w]]);r([[-270,w],[-outer,w]]);r([[outer,-w],[270,-w]]);r([[outer,w],[270,w]]);
- r([[-w,-230],[-w,-outer]]);r([[w,-230],[w,-outer]]);r([[-w,outer],[-w,230]]);r([[w,outer],[w,230]]);
- mh(0,-270,-outer-8);mh(0,outer+8,270);mv(0,-230,-outer-8);mv(0,outer+8,230);
- }
- if(!mini)circle(outer-8);labels.push({x:0,y:0,text:mini?'MINI GLORIETA':three?'3 ACCESOS':'GLORIETA'});break;}
- case'cross':case'cross-stop':case'urban-crosswalk':
- h(-48);h(48);v(-48);v(48);mh(0,-270,-54);mh(0,54,270);mv(0,-230,-54);mv(0,54,230);
- if(id==='cross-stop'){m([[-54,-65],[-54,65]]);m([[54,-65],[54,65]]);}
- if(id==='urban-crosswalk')for(let i=0;i<7;i++){let q=-42+i*14;m([[q,-48],[q,-95]]);m([[q,48],[q,95]]);m([[-48,q],[-95,q]]);m([[48,q],[95,q]]);}break;
- case't-junction':case'tjunction':case'rural-junction':
- h(-48);h(48);r([[-48,0],[-48,230]]);r([[48,0],[48,230]]);mh(0,-270,-55);mv(0,50,230);
- if(id==='rural-junction'){r([[-72,48],[-72,230]]);r([[72,48],[72,230]]);labels.push({x:150,y:-85,text:'CARRETERA RURAL'});}break;
- case'Y-junction':
- r([[-260,185],[-170,125],[-80,55],[-42,0],[-42,-220]]);r([[260,185],[170,125],[80,55],[42,0],[42,-220]]);
- r([[-260,245],[-190,195],[-105,112],[-75,55]]);r([[260,245],[190,195],[105,112],[75,55]]);
- m([[-260,215],[-180,160],[-80,55]]);m([[260,215],[180,160],[80,55]]);mv(0,-220,-70);break;
- case'merge':case'on-ramp':case'off-ramp':
- h(-115);h(-45);h(45);h(115);mh(-80);mh(80);
- if(id==='off-ramp'){r([[0,45],[65,55],[125,85],[185,140],[260,220]]);r([[0,115],[65,125],[135,160],[205,220]]);}
- else{r([[-270,220],[-205,185],[-130,145],[-55,115],[40,115],[270,115]]);m([[-270,175],[-200,145],[-130,105],[-55,45]]);}break;
- case'highway':case'divided-road':case'slip-road':
- if(id==='slip-road'){h(-125);h(-65);h(55);h(115);mh(-95);mh(85);labels.push({x:0,y:0,text:'VÍA DE SERVICIO'});}
- else{h(-125);h(-65);h(65);h(125);mh(-95);mh(-35);mh(35);mh(95);if(id==='divided-road'){r([[-270,-12],[270,-12]]);r([[-270,12],[270,12]]);labels.push({x:0,y:0,text:'MEDIANA'});}}break;
- case'rural':case'curve':case's-curve':case'chicane':{
- const a:number[][]=[],b:number[][]=[],c:number[][]=[];
- for(let i=0;i<=60;i++){const x=-270+i*9;let y=0;if(id==='rural')y=Math.sin(i/60*Math.PI*2)*18;if(id==='curve')y=Math.sin(i/60*Math.PI*2)*75;if(id==='s-curve')y=Math.sin(i/60*Math.PI*2)*78;if(id==='chicane')y=i<15?0:i<25?(i-15)*6:i<40?60:i<50?60-(i-40)*6:0;a.push([x,y-42]);b.push([x,y+42]);c.push([x,y]);}r(a);r(b);m(c);break;}
- case'crosswalk':h(-78);h(78);for(let i=0;i<9;i++)m([[-72+i*18,-70],[-72+i*18,70]]);break;
- case'school':h(-82);h(82);for(let i=0;i<8;i++)m([[-70+i*20,-80],[-70+i*20,80]]);r([[130,-82],[130,-150],[235,-150]]);r([[165,-82],[165,-120],[235,-120]]);labels.push({x:180,y:-175,text:'ZONA ESCOLAR'});break;
- case'parking':h(-115);h(115);for(let x=-220;x<=220;x+=55)v(x,-115,115);break;
- case'reverse':h(-125);h(0);h(125);for(let x=-220;x<=220;x+=55)m([[x,-125],[x,125]]);break;
- case'parking-angled':h(-120);h(120);for(let x=-220;x<=220;x+=55)r([[x,-120],[x+65,0],[x,120]]);break;
- case'parking-large':h(-140);h(-55);h(55);h(140);for(let x=-220;x<=220;x+=55){m([[x,-140],[x,-55]]);m([[x,55],[x,140]]);}break;
- case'lane-change':h(-105);h(-35);h(35);h(105);mh(-70);mh(0);mh(70);m([[-190,70],[-100,70],[0,0],[100,-70],[190,-70]]);break;
- case'urban':h(-65);h(65);r([[-105,-230],[-105,-65]]);r([[-45,-230],[-45,-65]]);r([[115,65],[115,230]]);r([[175,65],[175,230]]);mh(0);break;
- case'narrow':r([[-270,-110],[-100,-110],[-20,-55],[100,-55],[270,-55]]);r([[-270,110],[-100,110],[-20,55],[100,55],[270,55]]);mh(0);break;
- case'offset-cross':h(-85);h(-25);h(25);h(85);r([[-125,-230],[-125,-85]]);r([[-65,-230],[-65,-85]]);r([[65,85],[65,230]]);r([[125,85],[125,230]]);mh(0,-270,-145);mh(0,145,270);break;
- case'skewed-cross':r([[-270,-65],[270,-65]]);r([[-270,5],[270,5]]);r([[-125,-230],[-80,-120],[-25,0],[30,120],[75,230]]);r([[-55,-230],[-10,-120],[45,0],[100,120],[145,230]]);mh(-30);break;
- case'five-arm':h(-48);h(48);v(-48,-230,0);v(48,-230,0);r([[-250,-180],[-48,-48]]);r([[-215,-225],[-15,-93]]);r([[48,48],[250,180]]);r([[15,93],[215,225]]);break;
- case'lane-drop':r([[-270,-115],[270,-115]]);r([[-270,-40],[30,-40],[110,-75],[270,-75]]);r([[-270,45],[30,45],[110,-5],[270,-5]]);m([[0,-78],[90,-40],[180,-40],[270,-40]]);break;
- case'one-way':h(-85);h(85);r([[-270,-125],[270,-125]]);r([[-270,125],[270,125]]);for(let x=-210;x<=210;x+=105){r([[x,-85],[x,-125]]);m([[x-10,-25],[x+10,-25],[x,-5],[x-10,-25]]);}labels.push({x:0,y:48,text:'SENTIDO ÚNICO'});break;
- case'railway':h(-75);h(75);v(-22);v(22);mh(-15);mh(15);for(let y=-200;y<=200;y+=35)m([[-38,y-12],[38,y+12]]);r([[-65,-75],[-65,75]]);r([[65,-75],[65,75]]);labels.push({x:115,y:-110,text:'VÍA FÉRREA'});break;
- case'cul-de-sac':r([[-270,-42],[105,-42],[155,-42],[205,-20],[225,0],[205,20],[155,42],[105,42],[-270,42]]);r([[105,-42],[105,42]]);mh(0,-270,105);break;
- case'gas-station':h(-100);h(-40);h(40);h(100);r([[-95,-100],[-95,-205],[160,-205],[160,-100]]);r([[-45,-100],[-45,-155],[110,-155],[110,-100]]);labels.push({x:35,y:-180,text:'SERVICIOS'});break;
- default:return null;
- }
- return{roads:R,markings:M,labels};
-}
-
 
 type SceneGroup={name:string;subtitle:string;ids:string[]};
 const SCENE_GROUPS:SceneGroup[]=[
@@ -181,7 +86,7 @@ function RoadEditor({roads,selected,onSelect,onChange,onClose}:{roads:CustomRoad
 export default function App(){
  const host=useRef<HTMLDivElement>(null),vectorHost=useRef<HTMLDivElement>(null),vectorMap=useRef<any>(null),map=useRef<L.Map|null>(null),tile=useRef<L.TileLayer|null>(null),svg=useRef<SVGSVGElement>(null),drawing=useRef<Feature|null>(null);
  const [vectorReady,setVectorReady]=useState(false);const [tool,setTool]=useState('select'),[color,setColor]=useState(COLORS[1]),[layer,setLayer]=useState('3d'),[features,setFeatures]=useState<Feature[]>([]),[projects,setProjects]=useState<Project[]>(readProjects),[name,setName]=useState('Mi escenario'),[search,setSearch]=useState('Vila-seca, Tarragona'),[busy,setBusy]=useState(false),[showProjects,setShowProjects]=useState(false),[selected,setSelected]=useState<string|null>(null),[notice,setNotice]=useState(''),[mobileTools,setMobileTools]=useState(false),[mapReady,setMapReady]=useState(false);
- const [customRoads,setCustomRoads]=useState<CustomRoad[]>([]),[roadEditor,setRoadEditor]=useState(false),[selectedRoad,setSelectedRoad]=useState<string|null>(null);const [activeTemplate,setActiveTemplate]=useState<string|null>(null);const [showTemplates,setShowTemplates]=useState(false),[templateSearch,setTemplateSearch]=useState(''),[templateCategory,setTemplateCategory]=useState('Todos'),[expandedGroup,setExpandedGroup]=useState<string|null>(null);
+ const [customRoads,setCustomRoads]=useState<CustomRoad[]>([]),[roadEditor,setRoadEditor]=useState(false),[selectedRoad,setSelectedRoad]=useState<string|null>(null);const [activeTemplate,setActiveTemplate]=useState<string|null>(null);const [showTemplates,setShowTemplates]=useState(false),[templateSearch,setTemplateSearch]=useState(''),[expandedGroup,setExpandedGroup]=useState<string|null>(null);
  const [view,setView]=useState({center:{lat:41.111,lng:1.147},zoom:15});
  const [locating,setLocating]=useState(false);const locationMarker=useRef<L.CircleMarker|null>(null);const locationAccuracy=useRef<L.Circle|null>(null);
  const locateMe=()=>{
@@ -220,8 +125,6 @@ export default function App(){
  const onMove=(e:React.PointerEvent<SVGSVGElement>)=>{if(!drawing.current)return;const p=toLatLng(e.nativeEvent);const f=drawing.current;if(f.kind==='free'||f.kind==='line'||f.kind==='arrow'||f.kind==='zone')f.points=[...f.points,{lat:p.lat,lng:p.lng}];else f.points=[f.points[0],{lat:p.lat,lng:p.lng}];setFeatures(v=>[...v.filter(x=>x.id!==f.id),{...f,points:[...f.points]}]);};
  const onUp=()=>{if(!drawing.current)return;const f=drawing.current;drawing.current=null;map.current?.dragging.enable();if(f.kind==='text'){const t=window.prompt('Texto de la anotación','Prioridad');if(t)f.text=t;else return;}if(['car','bus','bike','ped','cone','sign'].includes(f.kind))f.points=[f.points[0]];setFeatures(v=>[...v.filter(x=>x.id!==f.id),f]);setSelected(f.id);};
  const applyTemplate=(t:Template)=>{setActiveTemplate(t.id);setCustomRoads([]);setFeatures([]);setSelected(null);setName(t.name);setLayer('esquema');setShowTemplates(false);setTool('select');setNotice('Escenario «'+t.name+'» abierto. Puedes dibujar y colocar elementos encima.');};
- const filteredTemplates=TEMPLATES.filter(t=>(templateCategory==='Todos'||t.category===templateCategory)&&(t.name+' '+t.description).toLowerCase().includes(templateSearch.toLowerCase()));
- const templateCategories=['Todos',...Array.from(new Set(TEMPLATES.map(t=>t.category)))];
  const undo=()=>setFeatures(v=>v.slice(0,-1));
  const removeSelected=()=>{setFeatures(v=>v.filter(f=>f.id!==selected));setSelected(null)};
  const exportSvg=()=>{const m=map.current;if(!m)return;const size=m.getSize();const paths=features.map(f=>{const pts=screenPoints(f);if(!pts.length)return'';const xy=pts.map(p=>p.x+','+p.y).join(' ');if(f.kind==='free'||f.kind==='line'||f.kind==='arrow'||f.kind==='zone')return '<polyline points="'+xy+'" fill="'+(f.kind==='zone'?f.color+'33':'none')+'" stroke="'+f.color+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" '+(f.kind==='arrow'?'marker-end="url(#a)"':'')+'/>';if(f.kind==='text')return '<text x="'+pts[0].x+'" y="'+pts[0].y+'" fill="'+f.color+'" font-size="20" font-weight="bold">'+(f.text||'Nota')+'</text>';const labels:Record<string,string>={car:'🚗',bus:'🚌',bike:'🚲',ped:'🚶',cone:'🔺',sign:'⛔'};return '<text x="'+pts[0].x+'" y="'+pts[0].y+'" font-size="30" text-anchor="middle">'+(labels[f.kind]||'')+'</text>';}).join('');const xml='<svg xmlns="http://www.w3.org/2000/svg" width="'+size.x+'" height="'+size.y+'"><rect width="100%" height="100%" fill="#fff"/>'+paths+'</svg>';const blob=new Blob([xml],{type:'image/svg+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(name||'pizarra').replace(/[^a-z0-9-_]/gi,'-')+'.svg';a.click();URL.revokeObjectURL(a.href);setNotice('Dibujo exportado en SVG');};
