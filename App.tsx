@@ -53,68 +53,67 @@ function readProjects():Project[]{try{const d=JSON.parse(localStorage.getItem(KE
 type SketchGeometry={roads:number[][][];markings:number[][][];labels?:{x:number;y:number;text:string}[]};
 const sketchCircle=(cx:number,cy:number,r:number,n=72)=>Array.from({length:n+1},(_,i)=>[cx+Math.cos(i/n*Math.PI*2)*r,cy+Math.sin(i/n*Math.PI*2)*r]);
 function preciseSketch(id:string):SketchGeometry|null{
- const R:number[][][]=[]; const M:number[][][]=[]; const add=(a:number[][])=>R.push(a); const mark=(a:number[][])=>M.push(a);
- const h=(y:number,x1=-270,x2=270)=>add([[x1,y],[x2,y]]);
- const v=(x:number,y1=-230,y2=230)=>add([[x,y1],[x,y2]]);
- const dashH=(y:number,x1=-270,x2=270)=>mark([[x1,y],[x2,y]]);
- const dashV=(x:number,y1=-230,y2=230)=>mark([[x,y1],[x,y2]]);
- if(id==='roundabout'||id==='three-arm-roundabout'||id==='mini-roundabout'){
-  const inner=id==='mini-roundabout'?30:58, outer=id==='mini-roundabout'?92:112, arm=id==='mini-roundabout'?27:38;
-  add(sketchCircle(0,0,inner)); add(sketchCircle(0,0,outer));
-  // Cuatro brazos: bordes se detienen exactamente en el anillo exterior.
-  add([[-270,-arm],[-outer,-arm]]); add([[-270,arm],[-outer,arm]]);
-  add([[outer,-arm],[270,-arm]]); add([[outer,arm],[270,arm]]);
-  add([[-arm,-230],[-arm,-outer]]); add([[arm,-230],[arm,-outer]]);
-  add([[-arm,outer],[-arm,230]]); add([[arm,outer],[arm,230]]);
-  mark([[-270,0],[-outer-8,0]]); mark([[outer+8,0],[270,0]]);
-  mark([[0,-230],[0,-outer-8]]); mark([[0,outer+8],[0,230]]);
-  if(id!=='mini-roundabout'){add(sketchCircle(0,0,outer-9));}
-  return {roads:R,markings:M,labels:[{x:0,y:0,text:id==='mini-roundabout'?'MINI GLORIETA':'GLORIETA'}]};
+ const R:number[][][]=[];const M:number[][][]=[];const labels:{x:number;y:number;text:string}[]=[];
+ const r=(p:number[][])=>R.push(p),m=(p:number[][])=>M.push(p);
+ const h=(y:number,a=-270,b=270)=>r([[a,y],[b,y]]),v=(x:number,a=-230,b=230)=>r([[x,a],[x,b]]);
+ const mh=(y:number,a=-270,b=270)=>m([[a,y],[b,y]]),mv=(x:number,a=-230,b=230)=>m([[x,a],[x,b]]);
+ const circle=(rad:number)=>r(Array.from({length:97},(_,i)=>[Math.cos(i/96*Math.PI*2)*rad,Math.sin(i/96*Math.PI*2)*rad]));
+ switch(id){
+ case'roundabout':case'mini-roundabout':case'three-arm-roundabout':{
+ const mini=id==='mini-roundabout',three=id==='three-arm-roundabout',inner=mini?25:three?45:58,outer=mini?78:three?100:112,w=mini?23:34;
+ circle(inner);circle(outer);
+ if(three){
+ r([[-250,100],[-outer*.72,outer*.72]]);r([[-250,150],[-outer*.38,outer*.92]]);
+ r([[outer*.72,outer*.72],[250,100]]);r([[outer*.38,outer*.92],[250,150]]);
+ r([[-w,-230],[-w,-outer]]);r([[w,-230],[w,-outer]]);
+ mh(125,-250,-outer*.55);mh(125,outer*.55,250);mv(0,-230,-outer-8);
+ }else{
+ r([[-270,-w],[-outer,-w]]);r([[-270,w],[-outer,w]]);r([[outer,-w],[270,-w]]);r([[outer,w],[270,w]]);
+ r([[-w,-230],[-w,-outer]]);r([[w,-230],[w,-outer]]);r([[-w,outer],[-w,230]]);r([[w,outer],[w,230]]);
+ mh(0,-270,-outer-8);mh(0,outer+8,270);mv(0,-230,-outer-8);mv(0,outer+8,230);
  }
- if(id==='cross'||id==='urban-crosswalk'||id==='cross-stop'){
-  h(-42);h(42);v(-42);v(42);
-  dashH(0,-270,-48);dashH(0,48,270);dashV(0,-230,-48);dashV(0,48,230);
-  if(id==='cross-stop'){mark([[-48,-62],[-48,62]]);mark([[48,-62],[48,62]]);mark([[-62,-48],[62,-48]]);mark([[-62,48],[62,48]]);}
-  return {roads:R,markings:M};
+ if(!mini)circle(outer-8);labels.push({x:0,y:0,text:mini?'MINI GLORIETA':three?'3 ACCESOS':'GLORIETA'});break;}
+ case'cross':case'cross-stop':case'urban-crosswalk':
+ h(-48);h(48);v(-48);v(48);mh(0,-270,-54);mh(0,54,270);mv(0,-230,-54);mv(0,54,230);
+ if(id==='cross-stop'){m([[-54,-65],[-54,65]]);m([[54,-65],[54,65]]);}
+ if(id==='urban-crosswalk')for(let i=0;i<7;i++){let q=-42+i*14;m([[q,-48],[q,-95]]);m([[q,48],[q,95]]);m([[-48,q],[-95,q]]);m([[48,q],[95,q]]);}break;
+ case't-junction':case'tjunction':case'rural-junction':
+ h(-48);h(48);r([[-48,0],[-48,230]]);r([[48,0],[48,230]]);mh(0,-270,-55);mv(0,50,230);
+ if(id==='rural-junction'){r([[-72,48],[-72,230]]);r([[72,48],[72,230]]);labels.push({x:150,y:-85,text:'CARRETERA RURAL'});}break;
+ case'Y-junction':
+ r([[-260,185],[-170,125],[-80,55],[-42,0],[-42,-220]]);r([[260,185],[170,125],[80,55],[42,0],[42,-220]]);
+ r([[-260,245],[-190,195],[-105,112],[-75,55]]);r([[260,245],[190,195],[105,112],[75,55]]);
+ m([[-260,215],[-180,160],[-80,55]]);m([[260,215],[180,160],[80,55]]);mv(0,-220,-70);break;
+ case'merge':case'on-ramp':case'off-ramp':
+ h(-115);h(-45);h(45);h(115);mh(-80);mh(80);
+ if(id==='off-ramp'){r([[0,45],[65,55],[125,85],[185,140],[260,220]]);r([[0,115],[65,125],[135,160],[205,220]]);}
+ else{r([[-270,220],[-205,185],[-130,145],[-55,115],[40,115],[270,115]]);m([[-270,175],[-200,145],[-130,105],[-55,45]]);}break;
+ case'highway':case'divided-road':case'slip-road':
+ if(id==='slip-road'){h(-125);h(-65);h(55);h(115);mh(-95);mh(85);labels.push({x:0,y:0,text:'VÍA DE SERVICIO'});}
+ else{h(-125);h(-65);h(65);h(125);mh(-95);mh(-35);mh(35);mh(95);if(id==='divided-road'){r([[-270,-12],[270,-12]]);r([[-270,12],[270,12]]);labels.push({x:0,y:0,text:'MEDIANA'});}}break;
+ case'rural':case'curve':case's-curve':case'chicane':{
+ const a:number[][]=[],b:number[][]=[],c:number[][]=[];
+ for(let i=0;i<=60;i++){const x=-270+i*9;let y=0;if(id==='rural')y=Math.sin(i/60*Math.PI*2)*18;if(id==='curve')y=Math.sin(i/60*Math.PI*2)*75;if(id==='s-curve')y=Math.sin(i/60*Math.PI*2)*78;if(id==='chicane')y=i<15?0:i<25?(i-15)*6:i<40?60:i<50?60-(i-40)*6:0;a.push([x,y-42]);b.push([x,y+42]);c.push([x,y]);}r(a);r(b);m(c);break;}
+ case'crosswalk':h(-78);h(78);for(let i=0;i<9;i++)m([[-72+i*18,-70],[-72+i*18,70]]);break;
+ case'school':h(-82);h(82);for(let i=0;i<8;i++)m([[-70+i*20,-80],[-70+i*20,80]]);r([[130,-82],[130,-150],[235,-150]]);r([[165,-82],[165,-120],[235,-120]]);labels.push({x:180,y:-175,text:'ZONA ESCOLAR'});break;
+ case'parking':h(-115);h(115);for(let x=-220;x<=220;x+=55)v(x,-115,115);break;
+ case'reverse':h(-125);h(0);h(125);for(let x=-220;x<=220;x+=55)m([[x,-125],[x,125]]);break;
+ case'parking-angled':h(-120);h(120);for(let x=-220;x<=220;x+=55)r([[x,-120],[x+65,0],[x,120]]);break;
+ case'parking-large':h(-140);h(-55);h(55);h(140);for(let x=-220;x<=220;x+=55){m([[x,-140],[x,-55]]);m([[x,55],[x,140]]);}break;
+ case'lane-change':h(-105);h(-35);h(35);h(105);mh(-70);mh(0);mh(70);m([[-190,70],[-100,70],[0,0],[100,-70],[190,-70]]);break;
+ case'urban':h(-65);h(65);r([[-105,-230],[-105,-65]]);r([[-45,-230],[-45,-65]]);r([[115,65],[115,230]]);r([[175,65],[175,230]]);mh(0);break;
+ case'narrow':r([[-270,-110],[-100,-110],[-20,-55],[100,-55],[270,-55]]);r([[-270,110],[-100,110],[-20,55],[100,55],[270,55]]);mh(0);break;
+ case'offset-cross':h(-85);h(-25);h(25);h(85);r([[-125,-230],[-125,-85]]);r([[-65,-230],[-65,-85]]);r([[65,85],[65,230]]);r([[125,85],[125,230]]);mh(0,-270,-145);mh(0,145,270);break;
+ case'skewed-cross':r([[-270,-65],[270,-65]]);r([[-270,5],[270,5]]);r([[-125,-230],[-80,-120],[-25,0],[30,120],[75,230]]);r([[-55,-230],[-10,-120],[45,0],[100,120],[145,230]]);mh(-30);break;
+ case'five-arm':h(-48);h(48);v(-48,-230,0);v(48,-230,0);r([[-250,-180],[-48,-48]]);r([[-215,-225],[-15,-93]]);r([[48,48],[250,180]]);r([[15,93],[215,225]]);break;
+ case'lane-drop':r([[-270,-115],[270,-115]]);r([[-270,-40],[30,-40],[110,-75],[270,-75]]);r([[-270,45],[30,45],[110,-5],[270,-5]]);m([[0,-78],[90,-40],[180,-40],[270,-40]]);break;
+ case'one-way':h(-85);h(85);r([[-270,-125],[270,-125]]);r([[-270,125],[270,125]]);for(let x=-210;x<=210;x+=105){r([[x,-85],[x,-125]]);m([[x-10,-25],[x+10,-25],[x,-5],[x-10,-25]]);}labels.push({x:0,y:48,text:'SENTIDO ÚNICO'});break;
+ case'railway':h(-75);h(75);v(-22);v(22);mh(-15);mh(15);for(let y=-200;y<=200;y+=35)m([[-38,y-12],[38,y+12]]);r([[-65,-75],[-65,75]]);r([[65,-75],[65,75]]);labels.push({x:115,y:-110,text:'VÍA FÉRREA'});break;
+ case'cul-de-sac':r([[-270,-42],[105,-42],[155,-42],[205,-20],[225,0],[205,20],[155,42],[105,42],[-270,42]]);r([[105,-42],[105,42]]);mh(0,-270,105);break;
+ case'gas-station':h(-100);h(-40);h(40);h(100);r([[-95,-100],[-95,-205],[160,-205],[160,-100]]);r([[-45,-100],[-45,-155],[110,-155],[110,-100]]);labels.push({x:35,y:-180,text:'SERVICIOS'});break;
+ default:return null;
  }
- if(id==='crosswalk'){h(-58);h(58);for(let i=-4;i<=4;i++)mark([[i*12,-58],[i*12,58]]);return {roads:R,markings:M};}
- if(id==='t-junction'||id==='rural-junction'||id==='tjunction'){
-  h(-42);h(42);add([[-42,0],[-42,230]]);add([[42,0],[42,230]]);dashH(0,-270,-48);dashH(0,48,270);dashV(0,48,230);
-  return {roads:R,markings:M};
- }
- if(id==='Y-junction'){
-  add([[-250,170],[-42,0],[-42,-220]]);add([[250,170],[42,0],[42,-220]]);
-  add([[-250,230],[-80,85],[-80,42]]);add([[250,230],[80,85],[80,42]]);
-  mark([[-250,200],[-80,55]]);mark([[250,200],[80,55]]);
-  return {roads:R,markings:M};
- }
- if(id==='highway'||id==='divided-road'||id==='slip-road'){
-  for(const y of [-112,-56,56,112])h(y);
-  h(0);dashH(-84);dashH(84);
-  return {roads:R,markings:M,labels:id==='divided-road'?[{x:0,y:0,text:'MEDIANA'}]:[]};
- }
- if(id==='merge'||id==='on-ramp'||id==='off-ramp'){
-  h(-105);h(-35);h(35);h(105);dashH(0);
-  if(id!=='off-ramp'){add([[-270,220],[-180,180],[-90,130],[0,105],[140,105],[270,105]]);mark([[-270,0],[270,0]]);}
-  else {add([[0,35],[80,55],[150,100],[220,165],[270,220]]);add([[0,105],[90,125],[160,170],[220,220]]);}
-  return {roads:R,markings:M};
- }
- if(id==='parking'||id==='reverse'||id==='parking-angled'||id==='parking-large'){
-  h(-105);h(105);h(0);
-  for(let x=-210;x<=210;x+=id==='parking-large'?60:70){
-   if(id==='parking-angled')add([[x-30,-105],[x+20,0],[x-30,105]]);
-   else if(id==='parking'||id==='reverse')v(x,-105,105);
-   else {v(x,-105,105);}
-  }
-  return {roads:R,markings:M};
- }
- if(id==='curve'||id==='s-curve'||id==='rural'){
-  const upper:number[][]=[],lower:number[][]=[];
-  for(let i=0;i<=40;i++){const x=-270+i*13.5;const y=id==='rural'?Math.sin(i/40*Math.PI*2)*18:id==='curve'?Math.sin(i/40*Math.PI*2)*65:Math.sin(i/40*Math.PI*4)*48;upper.push([x,y-42]);lower.push([x,y+42]);}
-  add(upper);add(lower);mark(upper.map((p,i)=>[p[0],(p[1]+lower[i][1])/2]));
-  return {roads:R,markings:M};
- }
- return null;
+ return{roads:R,markings:M,labels};
 }
 
 export default function App(){
