@@ -55,3 +55,17 @@
 
 /* Croquis técnicos: mismo fondo en la biblioteca y en el lienzo */
 .active-scene-board,.scene-option-picture{background:#e5e5e5}
+
+.road-editor-backdrop{position:fixed;inset:0;z-index:3000;background:#101820bb;display:flex;align-items:center;justify-content:center;padding:16px}
+.road-editor-panel{background:#fff;border-radius:16px;width:min(1200px,100%);height:min(850px,95vh);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 70px #0005}
+.road-editor-header,.road-editor-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 20px}
+.road-editor-header b{display:block;font-size:20px}.road-editor-header small{display:block;color:#697484;margin-top:4px}
+.road-editor-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 20px;border-block:1px solid #e1e5eb}
+.road-editor-controls label{display:flex;align-items:center;gap:7px;font-size:13px}
+.road-editor-controls button,.road-editor-header button,.road-editor-footer button{display:inline-flex;align-items:center;gap:6px;border:1px solid #d5dce5;border-radius:8px;background:#fff;padding:9px 12px;cursor:pointer}
+.road-editor-controls button:disabled{opacity:.4;cursor:not-allowed}
+.road-editor-svg{width:100%;flex:1;min-height:0;touch-action:none;cursor:crosshair}
+.road-editor-svg circle{cursor:grab;touch-action:none}
+.road-editor-footer{border-top:1px solid #e1e5eb;font-size:13px;color:#64748b}
+.road-editor-footer button{background:#1f5b9c;color:#fff}
+@media(max-width:600px){.road-editor-backdrop{padding:0}.road-editor-panel{height:100dvh;border-radius:0}.road-editor-controls{gap:6px;padding:8px}.road-editor-header,.road-editor-footer{padding:10px}.road-editor-controls button{padding:7px}}
