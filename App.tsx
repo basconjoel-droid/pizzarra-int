@@ -131,51 +131,40 @@ const SCENE_GROUPS:SceneGroup[]=[
 {name:'Entorno urbano',subtitle:'Calles, peatones y prioridades',ids:['urban','one-way','crosswalk','school','gas-station']}
 ];
 function ScenePreview({id}:{id:string}){
- const asphalt='#ffffff',grass='#e3e3e3',border='#44484c',white='#a6a9ac';
- const road=(d:string,w:number)=> <g><path d={d} fill="none" stroke={border} strokeWidth={w+1.5} strokeLinejoin="round"/><path d={d} fill="none" stroke={asphalt} strokeWidth={w} strokeLinejoin="round"/></g>;
- const mark=(d:string,solid=false)=> <path d={d} fill="none" stroke={white} strokeWidth="0.8" strokeDasharray={solid?undefined:"3 4"}/>;
- const zebra=(x:number,y:number,axis:'x'|'y'='x')=><g>{Array.from({length:7},(_,i)=><rect key={i} x={axis==='x'?x-13+i*4:x-7} y={axis==='x'?y-7:y-13+i*4} width={axis==='x'?2.5:14} height={axis==='x'?14:2.5} fill={white}/>)}</g>;
- const laneArrow=(x:number,y:number,rot=0)=><path transform={`translate(${x} ${y}) rotate(${rot})`} d="M 0 12 V -10 M -5 -4 L 0 -11 L 5 -4" stroke={white} strokeWidth="0.9" fill="none" strokeLinecap="round"/>;
- const horiz=(y=50,w=34)=>road(`M -25 ${y} H 205`,w);
- const vert=(x=90,w=34)=>road(`M ${x} -25 V 125`,w);
+ // Croquis originales: calzadas blancas, bordes continuos y marcas interrumpidas en las intersecciones.
+ const bg='#e5e5e5',roadColor='#fff',ink='#414141',lane='#a3a3a3';
+ const outline=(d:string,w=25)=><g><path d={d} fill="none" stroke={ink} strokeWidth={w+1.2} strokeLinejoin="round"/><path d={d} fill="none" stroke={roadColor} strokeWidth={w} strokeLinejoin="round"/></g>;
+ const shape=(d:string)=><path d={d} fill={roadColor} stroke={ink} strokeWidth="0.9" strokeLinejoin="round"/>;
+ const dash=(d:string)=><path d={d} stroke={lane} strokeWidth="0.8" strokeDasharray="3.5 4" fill="none"/>;
+ const h=(y=50,w=25)=>outline(`M -20 ${y} H 200`,w);
+ const v=(x=90,w=25)=>outline(`M ${x} -20 V 120`,w);
+ const zeb=(x:number,y:number,vertical=false)=><g>{Array.from({length:7},(_,i)=><rect key={i} x={vertical?x-12+i*4:x-7} y={vertical?y-7:y-12+i*4} width={vertical?2.4:14} height={vertical?14:2.4} fill="#b8b8b8"/>)}</g>;
+ const t=()=> <>{shape('M -20 62 H 78 Q 81 62 81 58 V -20 H 99 V 58 Q 99 62 103 62 H 200 V 82 H -20 Z')}{dash('M 90 -20 V 55')}{dash('M -20 72 H 73')}{dash('M 107 72 H 200')}</>;
+ const cross=()=> <>{shape('M 79 -20 H 101 V 36 Q 101 39 105 39 H 200 V 61 H 105 Q 101 61 101 65 V 120 H 79 V 65 Q 79 61 75 61 H -20 V 39 H 75 Q 79 39 79 35 Z')}{dash('M 90 -20 V 32')}{dash('M 90 68 V 120')}{dash('M -20 50 H 71')}{dash('M 109 50 H 200')}</>;
+ const y=()=> <>{shape('M -20 36 H 55 C 84 36 116 20 164 -14 L 180 7 C 145 32 117 45 107 50 C 137 55 154 70 184 93 L 170 113 C 124 80 96 64 55 64 H -20 Z')}{dash('M -20 50 H 63 C 95 50 129 28 172 -3')}{dash('M 63 50 C 107 51 135 77 177 103')}</>;
+ const merge=(exit=false,curved=false)=><>{shape(exit?'M -20 30 H 200 V 48 H 85 C 124 52 151 76 183 108 L 167 124 C 127 84 106 67 72 65 H -20 Z':curved?'M -20 110 C 10 50 60 25 112 21 L 200 9 V 29 L 119 40 C 89 44 70 56 54 73 C 98 70 137 78 200 82 V 102 C 141 97 106 92 69 94 C 38 97 10 112 -20 130 Z':'M -20 42 H 36 C 76 42 105 28 170 2 L 180 20 C 140 36 107 50 90 53 L 200 53 V 74 H -20 Z')}{dash(exit?'M -20 40 H 200 M 86 56 C 124 67 147 91 175 116':curved?'M -20 119 C 12 63 64 37 115 30 L 200 18 M 81 82 C 124 82 160 90 200 92':'M -20 63 H 200 M 25 52 C 81 51 119 33 175 12')}</>;
+ const round=(mini=false,three=false)=> <>{h(50,23)}{v(90,23)}<circle cx="90" cy="50" r={mini?29:35} fill={roadColor} stroke={ink} strokeWidth="0.9"/><circle cx="90" cy="50" r={mini?15:21} fill={bg} stroke={ink} strokeWidth="0.9"/><circle cx="90" cy="50" r={mini?22:28} fill="none" stroke={lane} strokeDasharray="3 4" strokeWidth="0.8"/>{three&&<rect x="77" y="84" width="26" height="18" fill={bg}/>} {dash('M -20 50 H 49')}{dash('M 131 50 H 200')}{dash('M 90 -20 V 10')}{!three&&dash('M 90 90 V 120')}</>;
+ const island=()=> <>{shape('M -20 38 H 54 C 68 38 79 23 79 -20 H 101 C 101 23 112 38 126 38 H 200 V 62 H 126 C 112 62 101 77 101 120 H 79 C 79 77 68 62 54 62 H -20 Z')}{shape('M 67 38 L 79 26 V 38 Z')}{shape('M 101 26 L 113 38 H 101 Z')}{shape('M 67 62 H 79 V 74 Z')}{shape('M 101 62 H 113 L 101 74 Z')}{dash('M -20 50 H 65')}{dash('M 115 50 H 200')}{dash('M 90 -20 V 26')}{dash('M 90 74 V 120')}</>;
+ const curved=(d:string,w=31)=> <>{outline(d,w)}{dash(d)}</>;
  let body:React.ReactNode;
- if(id==='roundabout'||id==='mini-roundabout'||id==='three-arm-roundabout'){
-  const mini=id==='mini-roundabout',three=id==='three-arm-roundabout',outer=mini?27:35,inner=mini?12:23;
-  body=<>{horiz(50,28)}{vert(90,28)}<circle cx="90" cy="50" r={outer+1} fill={border}/><circle cx="90" cy="50" r={outer} fill={asphalt}/><circle cx="90" cy="50" r={inner+1} fill={border}/><circle cx="90" cy="50" r={inner} fill={grass}/>{mark(`M 0 50 H ${90-outer-5}`)}{mark(`M ${90+outer+5} 50 H 180`)}{mark(`M 90 0 V ${50-outer-5}`)}{!three&&mark(`M 90 ${50+outer+5} V 100`)}{three&&<rect x="74" y={50+outer} width="32" height="65" fill={grass}/>}<path d={`M ${90+inner+4} 50 A ${inner+4} ${inner+4} 0 0 1 90 ${50+inner+4}`} fill="none" stroke={white} strokeWidth="1" strokeDasharray="3 5"/></>;
- }else if(['cross','urban-crosswalk','offset-cross','skewed-cross','five-arm','urban'].includes(id)){
-  const oblique=id==='skewed-cross',offset=id==='offset-cross',five=id==='five-arm',ped=id==='urban-crosswalk';
-  body=<>{horiz(50,32)}{oblique?road('M 57 -25 L 123 125',32):vert(offset?75:90,32)}{offset&&road('M 113 50 V 125',32)}{five&&road('M -25 -15 L 91 50',28)}
-   {oblique?<path d="M 77 34 L 104 66 L 91 83 L 64 51 Z" fill={asphalt}/>:<rect x={offset?59:74} y="34" width={offset?70:32} height="32" fill={asphalt}/>}
-   {mark('M 0 50 H 55')}{mark('M 125 50 H 180')}{!oblique&&mark(`M ${offset?75:90} 0 V 28`)}{!oblique&&mark(`M ${offset?113:90} 72 V 100`)}
-   {ped&&<>{zebra(90,20,'x')}{zebra(90,80,'x')}{zebra(54,50,'y')}{zebra(126,50,'y')}</>}
-  </>;
- }else if(['t-junction','rural-junction','Y-junction'].includes(id)){
-  body=id==='Y-junction'?<>{road('M 90 125 V 58 L 15 -25',30)}{road('M 90 58 L 165 -25',30)}{mark('M 90 125 V 77')}{mark('M 60 26 L 20 -18')}{mark('M 120 26 L 160 -18')}</>:<>{horiz(32,32)}{road('M 90 32 V 125',32)}<rect x="74" y="16" width="32" height="33" fill={asphalt}/>{mark('M 0 32 H 68')}{mark('M 112 32 H 180')}{mark('M 90 54 V 100')}<path d="M 74 55 H 106" stroke={white} strokeWidth="0.8"/></>;
- }else if(['merge','on-ramp','off-ramp','lane-drop'].includes(id)){
-  const exit=id==='off-ramp',drop=id==='lane-drop';
-  body=<>{horiz(29,27)}{horiz(75,27)}{road(exit?'M 73 75 C 113 75 134 104 182 135':drop?'M -25 123 C 35 115 74 75 126 75 H 205':'M -25 132 C 37 112 65 75 125 75 H 205',25)}{mark('M 0 29 H 180')}{mark('M 0 75 H 64')}{mark('M 134 75 H 180')}{mark(exit?'M 106 85 L 157 121':'M 10 117 L 75 84')}</>;
- }else if(['highway','divided-road','slip-road'].includes(id)){
-  body=<>{horiz(29,31)}{horiz(77,31)}<rect x="0" y="48" width="180" height="10" fill={grass}/>{mark('M 0 29 H 180')}{mark('M 0 77 H 180')}{laneArrow(130,29,90)}{laneArrow(50,77,-90)}</>;
- }else if(['parking','reverse','parking-angled','parking-large'].includes(id)){
-  const angled=id==='parking-angled',parallel=id==='parking';
-  body=<><rect x="0" y="0" width="180" height="100" fill={grass}/><rect x="0" y="9" width="180" height="28" fill={asphalt} stroke={border} strokeWidth="0.8"/><rect x="0" y="76" width="180" height="24" fill={asphalt} stroke={border} strokeWidth="0.8"/><rect x="0" y="37" width="180" height="39" fill={asphalt}/>{Array.from({length:8},(_,i)=><g key={i}><path d={angled?`M ${i*26} 0 l 15 36`:`M ${i*26} 0 V 36`} stroke={white} strokeWidth="1.3"/><path d={angled?`M ${i*26} 76 l 15 24`:`M ${i*26} 76 V 100`} stroke={white} strokeWidth="1.3"/></g>)}{parallel&&<>{mark('M 0 55 H 180')}{laneArrow(90,55,90)}</>}</>;
- }else if(['lane-change','one-way'].includes(id)){
-  body=<>{horiz(50,76)}{mark('M 0 50 H 180')}{laneArrow(48,32,90)}{laneArrow(125,68,90)}</>;
- }else if(['rural','curve','s-curve','chicane','narrow'].includes(id)){
-  const d=id==='rural'?'M -25 50 H 205':id==='narrow'?'M -25 50 H 55 Q 80 50 105 41 H 205':id==='chicane'?'M -25 50 H 38 Q 58 50 74 37 H 116 Q 133 37 152 50 H 205':'M -25 50 C 26 5 65 95 108 50 S 163 10 205 50';
-  body=<>{road(d,id==='narrow'?30:39)}{mark(d,id==='rural')}</>;
- }else if(['crosswalk','school'].includes(id)){
-  body=<>{horiz(50,44)}{mark('M 0 50 H 65')}{mark('M 115 50 H 180')}{zebra(90,50,'x')}{id==='school'&&<rect x="130" y="2" width="42" height="22" rx="2" fill="#f5f5f5" stroke="#b6b6b6"/>}</>;
- }else if(id==='railway'){
-  body=<>{horiz(50,40)}<rect x="78" y="0" width="24" height="100" fill="#eeeeee"/>{Array.from({length:9},(_,i)=><path key={i} d={`M 78 ${i*13} H 102`} stroke="#999999" strokeWidth="3"/>)}<path d="M 84 0 V 100 M 96 0 V 100" stroke="#f4f4f4" strokeWidth="2" fill="none"/></>;
- }else if(id==='gas-station'){
-  body=<>{horiz(73,33)}<rect x="36" y="5" width="105" height="37" rx="3" fill="#e8dfc6" stroke="#d3cab1"/>{road('M 52 42 V 73',19)}{road('M 122 42 V 73',19)}{mark('M 0 73 H 35')}{mark('M 140 73 H 180')}</>;
- }else if(id==='cul-de-sac'){
-  body=<>{road('M -25 50 H 121',35)}<circle cx="122" cy="50" r="34" fill={border}/><circle cx="122" cy="50" r="33" fill={asphalt}/>{mark('M 0 50 H 94')}</>;
- }else{
-  body=<>{horiz(50,38)}{mark('M 0 50 H 180')}</>;
- }
- return <svg viewBox="0 0 180 100" preserveAspectRatio="xMidYMid slice" role="img" aria-label={'Croquis vial: '+id} style={{display:'block',width:'100%',height:'100%'}}><rect width="180" height="100" fill={grass}/>{body}</svg>;
+ if(['t-junction','rural-junction'].includes(id))body=t();
+ else if(['cross','urban','urban-crosswalk'].includes(id))body=<>{cross()}{id==='urban-crosswalk'&&<>{zeb(90,20,true)}{zeb(90,80,true)}{zeb(55,50)}{zeb(125,50)}</>}</>;
+ else if(id==='Y-junction')body=y();
+ else if(['merge','on-ramp','off-ramp','lane-drop'].includes(id))body=merge(id==='off-ramp');
+ else if(id==='roundabout'||id==='mini-roundabout'||id==='three-arm-roundabout')body=round(id==='mini-roundabout',id==='three-arm-roundabout');
+ else if(id==='five-arm')body=<>{island()}{outline('M -20 -20 L 80 40',22)}{dash('M -20 -20 L 65 31')}</>;
+ else if(id==='skewed-cross')body=<>{h(50,24)}{outline('M 63 -20 L 117 120',24)}<path d="M 75 37 L 105 63 L 100 75 L 70 49 Z" fill={roadColor}/>{dash('M -20 50 H 62')}{dash('M 118 50 H 200')}{dash('M 67 -20 L 83 29')}{dash('M 98 74 L 116 120')}</>;
+ else if(id==='offset-cross')body=<>{h(50,26)}{outline('M 72 -20 V 50',25)}{outline('M 113 50 V 120',25)}<rect x="59" y="37" width="67" height="26" fill={roadColor}/>{dash('M -20 50 H 52')}{dash('M 132 50 H 200')}{dash('M 72 -20 V 33')}{dash('M 113 67 V 120')}</>;
+ else if(['highway','divided-road','slip-road'].includes(id))body=<>{h(28,26)}{h(76,26)}<rect x="0" y="44" width="180" height="16" fill={bg}/>{dash('M -20 28 H 200')}{dash('M -20 76 H 200')}</>;
+ else if(['parking','reverse','parking-angled','parking-large'].includes(id))body=<><rect x="0" y="11" width="180" height="28" fill={roadColor} stroke={ink} strokeWidth=".8"/><rect x="0" y="39" width="180" height="34" fill={roadColor}/><rect x="0" y="73" width="180" height="28" fill={roadColor} stroke={ink} strokeWidth=".8"/>{Array.from({length:9},(_,i)=><g key={i}><path d={id==='parking-angled'?`M ${i*23} 11 l 13 28`:`M ${i*23} 11 V 39`} stroke={lane} strokeWidth=".9"/><path d={id==='parking-angled'?`M ${i*23} 73 l 13 28`:`M ${i*23} 73 V 101`} stroke={lane} strokeWidth=".9"/></g>)}{id==='parking'&&dash('M -20 56 H 200')}</>;
+ else if(['lane-change','one-way'].includes(id))body=<>{h(50,70)}{dash('M -20 50 H 200')}{id==='one-way'&&<path d="M 137 31 L 150 50 L 137 69" fill="none" stroke={lane} strokeWidth="1.2"/>}</>;
+ else if(['curve','s-curve','chicane','rural','narrow'].includes(id)){const d=id==='rural'?'M -20 50 H 200':id==='narrow'?'M -20 50 H 55 Q 75 50 98 40 H 200':id==='chicane'?'M -20 50 H 42 Q 61 50 80 37 H 117 Q 138 37 156 50 H 200':'M -20 50 C 35 5 67 96 112 50 S 165 8 200 50';body=curved(d,id==='narrow'?26:33);}
+ else if(['crosswalk','school'].includes(id))body=<>{h(50,39)}{dash('M -20 50 H 70')}{dash('M 110 50 H 200')}{zeb(90,50,true)}</>;
+ else if(id==='railway')body=<>{h(50,35)}<rect x="80" y="0" width="20" height="100" fill="#e5e5e5"/>{Array.from({length:9},(_,i)=><path key={i} d={`M 80 ${i*12} H 100`} stroke="#888" strokeWidth="2"/>)}<path d="M 84 0 V 100 M 96 0 V 100" stroke={ink} strokeWidth="1.1"/></>;
+ else if(id==='cul-de-sac')body=<>{outline('M -20 50 H 125',28)}<circle cx="125" cy="50" r="31" fill={roadColor} stroke={ink} strokeWidth=".9"/>{dash('M -20 50 H 95')}</>;
+ else if(id==='gas-station')body=<>{h(73,26)}<rect x="39" y="7" width="105" height="32" fill={roadColor} stroke={ink} strokeWidth=".9"/>{outline('M 58 39 V 73',16)}{outline('M 125 39 V 73',16)}</>;
+ else body=merge(false,true);
+ return <svg viewBox="0 0 180 100" preserveAspectRatio="xMidYMid meet" role="img" aria-label={'Esquema de '+id} style={{display:'block',width:'100%',height:'100%'}}><rect width="180" height="100" fill={bg}/>{body}</svg>;
 }
 
 export default function App(){
