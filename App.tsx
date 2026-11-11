@@ -52,7 +52,6 @@ function readProjects():Project[]{try{const d=JSON.parse(localStorage.getItem(KE
 
 type SketchGeometry={roads:number[][][];markings:number[][][];labels?:{x:number;y:number;text:string}[]};
 const sketchCircle=(cx:number,cy:number,r:number,n=72)=>Array.from({length:n+1},(_,i)=>[cx+Math.cos(i/n*Math.PI*2)*r,cy+Math.sin(i/n*Math.PI*2)*r]);
-const sketchLine=(...p:number[][])=>p;
 function preciseSketch(id:string):SketchGeometry|null{
  const R:number[][][]=[]; const M:number[][][]=[]; const add=(a:number[][])=>R.push(a); const mark=(a:number[][])=>M.push(a);
  const h=(y:number,x1=-270,x2=270)=>add([[x1,y],[x2,y]]);
@@ -110,7 +109,7 @@ function preciseSketch(id:string):SketchGeometry|null{
   return {roads:R,markings:M};
  }
  if(id==='curve'||id==='s-curve'||id==='rural'){
-  const upper:number[][]=[],lower:number[][];
+  const upper:number[][]=[],lower:number[][]=[];
   for(let i=0;i<=40;i++){const x=-270+i*13.5;const y=id==='rural'?Math.sin(i/40*Math.PI*2)*18:id==='curve'?Math.sin(i/40*Math.PI*2)*65:Math.sin(i/40*Math.PI*4)*48;upper.push([x,y-42]);lower.push([x,y+42]);}
   add(upper);add(lower);mark(upper.map((p,i)=>[p[0],(p[1]+lower[i][1])/2]));
   return {roads:R,markings:M};
