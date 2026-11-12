@@ -82,3 +82,6 @@
 .fullscreen-draw-tools button{border:1px solid #d5dce5;background:#fff;border-radius:7px;padding:9px 11px;font-size:12px;font-weight:700;white-space:nowrap;color:#253b52}
 .fullscreen-draw-tools button.chosen{background:#dbeafe;border-color:#93c5fd;color:#155b98}
 @media(max-width:700px){.fullscreen-toggle{padding:7px;font-size:11px}.map-fullscreen .map-toolbar{max-height:116px;overflow-y:auto;align-content:center}.map-fullscreen .layers button{padding:0 7px}.map-fullscreen .map-actions button{min-width:30px;width:30px}.fullscreen-draw-tools{width:max-content}}
+
+.vector-map-visible.vector-interactive{pointer-events:auto;touch-action:none}
+.fullscreen-draw-tools button:disabled{opacity:.4}
