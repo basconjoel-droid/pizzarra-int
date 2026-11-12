@@ -85,3 +85,10 @@
 
 .vector-map-visible.vector-interactive{pointer-events:auto;touch-action:none}
 .fullscreen-draw-tools button:disabled{opacity:.4}
+
+.route-finish,.simulation-controls{position:absolute;z-index:950;left:50%;transform:translateX(-50%);background:#fffffff2;border:1px solid #b7c5d3;border-radius:11px;box-shadow:0 3px 15px #0002;padding:9px 12px;color:#153c5b;font-weight:700}
+.route-finish{top:70px;cursor:pointer}
+.simulation-controls{bottom:76px;display:flex;align-items:center;gap:8px;max-width:calc(100% - 20px)}
+.simulation-controls input{width:clamp(80px,28vw,220px)}
+.simulation-controls button,.simulation-controls select{background:#eaf2fb;border:1px solid #bdcede;border-radius:7px;padding:7px;font-size:12px}
+@media(max-width:700px){.simulation-controls{bottom:85px;padding:6px;gap:4px}.simulation-controls input{width:95px}}
